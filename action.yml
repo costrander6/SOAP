@@ -60,7 +60,7 @@ runs:
     - name: Run semgrep
       if: inputs.security_level == 'advanced'
       run: |
-        sudo apt install libtree-sitter0.22 
+        sudo apt-get install -y libtree-sitter0.22 
         pip install $SEMGREP_URL
         semgrep scan .github/workflows
       shell: bash
