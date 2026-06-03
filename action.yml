@@ -1,0 +1,43 @@
+name: SOAP
+description: The Scanner Orchestration & Analysis Pipeline orchestrates multiple workflow scanning tools depending on the provided security level.
+
+inputs:
+  security_level:
+    required: true
+    type: multi-choice
+    options:
+    - fundamental
+    - essential
+    - advanced
+
+runs:
+  using: 'composite'  
+  steps:
+    - uses: actions/checkout@v6
+    
+    - name: Set Versions and URLs
+      run: |
+        ACTIONLINT_VERSION="v0.0.4-soap"
+        POUTINE_VERSION="placeholder"
+        FRIZBEE_VERSION="placeholder"
+        SEMGREP_VERSION="placeholder"
+
+        echo "ACTIONLINT_VERSION=${ACTIONLINT_VERSION}" >> $GITHUB_ENV
+        echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_0.0.4-soap_linux_amd64.tar.gz" >> $GITHUB_ENV
+
+        echo "POUTINE_VERSION=placeholder" >> $GITHUB_ENV
+        echo "POUTINE_URL=placeholder" >> $GITHUB_ENV
+
+        echo "FRIZBEE_VERSION=placeholder" >> $GITHUB_ENV
+        echo "FRIZBEE_URL=placeholder" >> $GITHUB_ENV
+
+        echo "SEMGREP_VERSION=placeholder" >> $GITHUB_ENV
+        echo "SEMGREP_URL=placeholder" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Run actionlint
+      run: |
+        wget $ACTIONLINT_URL
+        tar -xvf actionlint-for-SOAP_${ACTIONLINT_VERSION}_linux_amd64.tar.gz
+        ./actionlint-for-SOAP
+      shell: bash
