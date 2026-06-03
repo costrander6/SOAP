@@ -14,24 +14,24 @@ runs:
   using: 'composite'  
   steps:
     - uses: actions/checkout@v6
-    
+
     - name: Set Versions and URLs
       run: |
         ACTIONLINT_VERSION="v0.0.4-soap"
-        POUTINE_VERSION="placeholder"
+        POUTINE_VERSION="v0.0.2-soap"
         FRIZBEE_VERSION="placeholder"
         SEMGREP_VERSION="placeholder"
 
         echo "ACTIONLINT_VERSION=${ACTIONLINT_VERSION}" >> $GITHUB_ENV
         echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_0.0.4-soap_linux_amd64.tar.gz" >> $GITHUB_ENV
 
-        echo "POUTINE_VERSION=placeholder" >> $GITHUB_ENV
-        echo "POUTINE_URL=placeholder" >> $GITHUB_ENV
+        echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
+        echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
 
-        echo "FRIZBEE_VERSION=placeholder" >> $GITHUB_ENV
+        echo "FRIZBEE_VERSION=${FRIZBEE_VERSION}" >> $GITHUB_ENV
         echo "FRIZBEE_URL=placeholder" >> $GITHUB_ENV
 
-        echo "SEMGREP_VERSION=placeholder" >> $GITHUB_ENV
+        echo "SEMGREP_VERSION=${SEMGREP_VERSION}" >> $GITHUB_ENV
         echo "SEMGREP_URL=placeholder" >> $GITHUB_ENV
       shell: bash
 
@@ -40,4 +40,11 @@ runs:
         wget $ACTIONLINT_URL
         tar -xvf actionlint-for-SOAP_${ACTIONLINT_VERSION}_linux_amd64.tar.gz
         ./actionlint-for-SOAP
+      shell: bash
+
+    - name: Run poutine
+      run: |
+        wget $POUTINE_URL
+        tar -xvf poutine_Linux_x86_64.tar.gz
+        ./poutine analyze_local .
       shell: bash
