@@ -20,7 +20,7 @@ runs:
         ACTIONLINT_VERSION="v0.0.4-soap"
         POUTINE_VERSION="v0.0.2-soap"
         FRIZBEE_VERSION="v0.0.3-soap"
-        SEMGREP_VERSION="placeholder"
+        SEMGREP_VERSION="v0.0.1-soap"
 
         echo "ACTIONLINT_VERSION=${ACTIONLINT_VERSION}" >> $GITHUB_ENV
         echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
@@ -32,7 +32,7 @@ runs:
         echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "SEMGREP_VERSION=${SEMGREP_VERSION}" >> $GITHUB_ENV
-        echo "SEMGREP_URL=placeholder" >> $GITHUB_ENV
+        echo "SEMGREP_URL=https://github.com/costrander6/semgrep-for-SOAP/releases/download/${SEMGREP_VERSION}/semgrep-1.164.0-cp310.cp311.cp312.cp313.cp314.py310.py311.py312.py313.py314-none-manylinux_2_34_x86_64.whl" >> $GITHUB_ENV
       shell: bash
 
     - name: Run actionlint
@@ -55,4 +55,12 @@ runs:
         wget $FRIZBEE_URL
         tar -xvf frizbee_${FRIZBEE_VERSION}_linux_amd64.tar.gz
         ./frizbee actions .github/workflows --dry-run
+      shell: bash
+
+    - name: Run semgrep
+      if: inputs.security_level == 'advanced'
+      run: |
+        sudo apt install libtree-sitter0.22 
+        pip install $SEMGREP_URL
+        semgrep scan .github/workflows
       shell: bash
