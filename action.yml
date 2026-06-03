@@ -13,23 +13,23 @@ inputs:
 runs:
   using: 'composite'  
   steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
     - name: Set Versions and URLs
       run: |
         ACTIONLINT_VERSION="v0.0.4-soap"
         POUTINE_VERSION="v0.0.2-soap"
-        FRIZBEE_VERSION="placeholder"
+        FRIZBEE_VERSION="v0.0.3-soap"
         SEMGREP_VERSION="placeholder"
 
         echo "ACTIONLINT_VERSION=${ACTIONLINT_VERSION}" >> $GITHUB_ENV
-        echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_0.0.4-soap_linux_amd64.tar.gz" >> $GITHUB_ENV
+        echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_${ACTIONLINT_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
         echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
 
         echo "FRIZBEE_VERSION=${FRIZBEE_VERSION}" >> $GITHUB_ENV
-        echo "FRIZBEE_URL=placeholder" >> $GITHUB_ENV
+        echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "SEMGREP_VERSION=${SEMGREP_VERSION}" >> $GITHUB_ENV
         echo "SEMGREP_URL=placeholder" >> $GITHUB_ENV
@@ -47,4 +47,12 @@ runs:
         wget $POUTINE_URL
         tar -xvf poutine_Linux_x86_64.tar.gz
         ./poutine analyze_local .
+      shell: bash
+
+    - name: Run frizbee
+      if: inputs.security_level == 'essential' || inputs.security_level == 'advanced'
+      run: |
+        wget $FRIZBEE_URL
+        tar -xvf frizbee_${FRIZBEE_VERSION}_linux_amd64.tar.gz
+        ./frizbee actions .github/workflows --dry-run
       shell: bash
