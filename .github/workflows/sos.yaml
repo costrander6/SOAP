@@ -1,0 +1,29 @@
+name: Run SOAP on SOAP
+on:
+    workflow_dispatch:
+        inputs:
+            security_level:
+                required: true
+                type: choice
+                options:
+                - fundamental
+                - essential
+                - advanced
+    pull_request:
+        types: [opened, synchronize, reopened]
+        branches:
+        - main
+
+jobs:
+    run-soap-workflow-dispatch:
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: costrander6/SOAP@91a120b90a5b0b879c67653421aae700414444f8 #v1.0.0
+        
+
+    run-soap-pr:
+        if: ${{ github.event_name == 'pull_request' }}
+        runs-on: ubuntu-latest
+        steps:
+            - uses: costrander6/SOAP@91a120b90a5b0b879c67653421aae700414444f8 #v1.0.0
