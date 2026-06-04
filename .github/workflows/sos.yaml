@@ -15,15 +15,9 @@ on:
         - main
 
 jobs:
-    run-soap-workflow-dispatch:
-        if: ${{ github.event_name == 'workflow_dispatch' }}
+    run-soap:
         runs-on: ubuntu-latest
         steps:
             - uses: costrander6/SOAP@91a120b90a5b0b879c67653421aae700414444f8 #v1.0.1
-        
-
-    run-soap-pr:
-        if: ${{ github.event_name == 'pull_request' }}
-        runs-on: ubuntu-latest
-        steps:
-            - uses: costrander6/SOAP@91a120b90a5b0b879c67653421aae700414444f8 #v1.0.1
+              with:
+                security_level: ${{ github.event_name == 'pull_request' && 'advanced' || inputs.security_level }}
