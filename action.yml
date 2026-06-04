@@ -48,7 +48,12 @@ runs:
       run: |
         wget $ACTIONLINT_URL
         tar -xvf actionlint-for-SOAP_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz
-        ./actionlint-for-SOAP ${{ inputs.target }}
+        
+        TARGET="${{ inputs.target }}"
+        if [[ "$TARGET" != *.yml && "$TARGET" != *.yaml ]]; then
+          TARGET="${TARGET%/}/*"
+        fi
+        ./actionlint-for-SOAP $TARGET
       shell: bash
 
     - name: Run poutine
