@@ -84,7 +84,7 @@ runs:
       run: |
         wget $FRIZBEE_URL
         tar -xvf frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz
-        ./frizbee actions ${{ inputs.target }} --dry-run
+        ./frizbee actions --dry-run
       shell: bash
 
     - name: Run semgrep
