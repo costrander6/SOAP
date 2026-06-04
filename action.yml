@@ -18,23 +18,23 @@ runs:
     - name: Set Versions and URLs
       run: |
         ACTIONLINT_VERSION="v0.0.4-soap"
-        ACTIONLINT_URL_VERSION="${ACTIONLINT_VERSION#v}"
+        ACTIONLINT_PACKAGE_VERSION="${ACTIONLINT_VERSION#v}"
 
         POUTINE_VERSION="v0.0.2-soap"
 
         FRIZBEE_VERSION="v0.0.3-soap"
-        FRIZBEE_URL_VERSION="${FRIZBEE_VERSION#v}"
+        FRIZBEE_PACKAGE_VERSION="${FRIZBEE_VERSION#v}"
         
         SEMGREP_VERSION="v0.0.1-soap"
 
         echo "ACTIONLINT_VERSION=${ACTIONLINT_VERSION}" >> $GITHUB_ENV
-        echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_${ACTIONLINT_URL_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
+        echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
         echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
 
         echo "FRIZBEE_VERSION=${FRIZBEE_VERSION}" >> $GITHUB_ENV
-        echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_URL_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
+        echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "SEMGREP_VERSION=${SEMGREP_VERSION}" >> $GITHUB_ENV
         echo "SEMGREP_URL=https://github.com/costrander6/semgrep-for-SOAP/releases/download/${SEMGREP_VERSION}/semgrep-1.164.0-cp310.cp311.cp312.cp313.cp314.py310.py311.py312.py313.py314-none-manylinux_2_34_x86_64.whl" >> $GITHUB_ENV
@@ -43,7 +43,7 @@ runs:
     - name: Run actionlint
       run: |
         wget $ACTIONLINT_URL
-        tar -xvf actionlint-for-SOAP_${ACTIONLINT_VERSION}_linux_amd64.tar.gz
+        tar -xvf actionlint-for-SOAP_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz
         ./actionlint-for-SOAP
       shell: bash
 
@@ -58,7 +58,7 @@ runs:
       if: inputs.security_level == 'essential' || inputs.security_level == 'advanced'
       run: |
         wget $FRIZBEE_URL
-        tar -xvf frizbee_${FRIZBEE_VERSION}_linux_amd64.tar.gz
+        tar -xvf frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz
         ./frizbee actions .github/workflows --dry-run
       shell: bash
 
