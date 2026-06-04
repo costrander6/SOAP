@@ -18,6 +18,6 @@ jobs:
     run-soap:
         runs-on: ubuntu-latest
         steps:
-            - uses: costrander6/SOAP@91a120b90a5b0b879c67653421aae700414444f8 #v1.0.1
+            - uses: costrander6/SOAP@000db0b90896cb80cf9eb39b490f590b085bd3b3 #v1.0.2
               with:
                 security_level: ${{ github.event_name == 'pull_request' && 'advanced' || inputs.security_level }}
