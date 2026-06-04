@@ -70,7 +70,7 @@ runs:
           if [[ -f "$TARGET" ]]; then
             cp "$TARGET" .github/workflows/
           elif [[ -d "$TARGET" ]]; then
-            cp $TARGET/* .github/workflows/
+            cp "$TARGET"/* .github/workflows/
           else
             cp $TARGET .github/workflows/
           fi
@@ -84,7 +84,12 @@ runs:
       run: |
         wget $FRIZBEE_URL
         tar -xvf frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz
-        ./frizbee actions .github/workflows --dry-run
+
+        if [[ -f "$TARGET" ]]; then
+          ./frizbee actions "$TARGET" --dry-run
+        else
+          ./frizbee actions .github/workflows --dry-run
+        fi
       shell: bash
 
     - name: Run semgrep
