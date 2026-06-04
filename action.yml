@@ -4,7 +4,7 @@ description: The Scanner Orchestration & Analysis Pipeline orchestrates multiple
 inputs:
   security_level:
     required: true
-    type: multi-choice
+    type: choice
     options:
     - fundamental
     - essential
