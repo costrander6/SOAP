@@ -27,16 +27,15 @@ runs:
         
         SEMGREP_VERSION="v0.0.1-soap"
 
-        echo "ACTIONLINT_VERSION=${ACTIONLINT_VERSION}" >> $GITHUB_ENV
+        echo "ACTIONLINT_PACKAGE_VERSION=${ACTIONLINT_PACKAGE_VERSION}" >> $GITHUB_ENV
         echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
         echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
 
-        echo "FRIZBEE_VERSION=${FRIZBEE_VERSION}" >> $GITHUB_ENV
+        echo "FRIZBEE_PACKAGE_VERSION=${FRIZBEE_PACKAGE_VERSION}" >> $GITHUB_ENV
         echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
-        echo "SEMGREP_VERSION=${SEMGREP_VERSION}" >> $GITHUB_ENV
         echo "SEMGREP_URL=https://github.com/costrander6/semgrep-for-SOAP/releases/download/${SEMGREP_VERSION}/semgrep-1.164.0-cp310.cp311.cp312.cp313.cp314.py310.py311.py312.py313.py314-none-manylinux_2_34_x86_64.whl" >> $GITHUB_ENV
       shell: bash
 
