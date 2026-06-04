@@ -67,5 +67,5 @@ runs:
         sudo apt-get update
         sudo apt-get install -y libev4 libpcre3
         pip install $SEM_URL
-        semgrep scan --config="p/github-actions" .github/workflows
+        semgrep scan .github/workflows
       shell: bash
