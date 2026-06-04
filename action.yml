@@ -53,6 +53,7 @@ runs:
         if [[ "$TARGET" != *.yml && "$TARGET" != *.yaml ]]; then
           TARGET="${TARGET%/}/*"
         fi
+
         ./actionlint-for-SOAP $TARGET
       shell: bash
 
@@ -60,7 +61,19 @@ runs:
       run: |
         wget $POUTINE_URL
         tar -xvf poutine_Linux_x86_64.tar.gz
-        ./poutine analyze_local ${{ inputs.target }}
+
+        if [[ "$TARGET" != ".github/workflows" ]]; then
+          mkdir -p .github/workflows
+          if [[ -f "$TARGET" ]]; then
+            cp "$TARGET" .github/workflows/
+          elif [[ -d "$TARGET" ]]; then
+            cp "${TARGET%/}"/* .github/workflows/
+          else
+            cp $TARGET .github/workflows/
+          fi
+        fi
+
+        ./poutine analyze_local . --disable-version-check
       shell: bash
 
     - name: Run frizbee
