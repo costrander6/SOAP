@@ -64,7 +64,8 @@ runs:
     - name: Run semgrep
       if: inputs.security_level == 'advanced'
       run: |
+        sudo apt-get update
         sudo apt-get install -y libev4 libpcre3
         pip install $SEMGREP_URL
-        semgrep scan .github/workflows
+        semgrep scan --config auto .github/workflows
       shell: bash
