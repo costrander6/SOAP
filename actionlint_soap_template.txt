@@ -1,0 +1,15 @@
+{
+    "scanner": "actionlint",
+    "timestamp": "{{ now }}",
+    "findings": [
+        {{- $first := true}}
+        {{- range $ := .}}{{if $first}}{{$first = false}}{{else}},{{end}}
+        {
+            "title": "{{$.Kind}}",
+            "description": {{jsonNoNewLine $.Message}},
+            "file": "{{$.Filepath}}",
+            "lineStart": {{$.Line}},
+            "lineEnd": {{$.Line}}
+        }{{end}}
+    ]
+}
