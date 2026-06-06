@@ -21,7 +21,7 @@ runs:
 
     - name: Set Versions and URLs
       run: |
-        ACTIONLINT_VERSION="v1.0.0-soap"
+        ACTIONLINT_VERSION="v1.7.12"
         ACTIONLINT_PACKAGE_VERSION="${ACTIONLINT_VERSION#v}"
 
         POUTINE_VERSION="v0.0.2-soap"
@@ -32,7 +32,7 @@ runs:
         SEMGREP_VERSION="v0.1.1-soap"
 
         echo "ACTIONLINT_PACKAGE_VERSION=${ACTIONLINT_PACKAGE_VERSION}" >> $GITHUB_ENV
-        echo "ACTIONLINT_URL=https://github.com/costrander6/actionlint-for-SOAP/releases/download/${ACTIONLINT_VERSION}/actionlint-for-SOAP_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
+        echo "ACTIONLINT_URL=https://github.com/rhysd/actionlint/releases/download/${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
         echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
@@ -46,15 +46,19 @@ runs:
     - name: Run actionlint
       continue-on-error: true
       run: |
-        wget $ACTIONLINT_URL
-        tar -xvf actionlint-for-SOAP_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz
+        gh release download --repo rhysd/actionlint --pattern '*_linux_amd64.tar.gz' $ACTIONLINT_VERSION
+        tar -xvf actionlint_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz
+
+        gh attestation verify -R rhysd/actionlint actionlint_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz
         
         TARGET="${{ inputs.target }}"
         if [[ "$TARGET" != *.yml && "$TARGET" != *.yaml ]]; then
           TARGET="${TARGET%/}/*"
         fi
 
-        ./actionlint-for-SOAP -format "$(cat $GITHUB_ACTION_PATH/actionlint_soap_template.txt)" $TARGET
+        echo "ACTIONLINT_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
+
+        ./actionlint -format "$(cat $GITHUB_ACTION_PATH/actionlint_soap_template.txt)" $TARGET
       shell: bash
 
     - name: Run poutine
