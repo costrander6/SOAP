@@ -21,7 +21,7 @@ runs:
 
     - name: Set Versions and URLs
       run: |
-        ACTIONLINT_VERSION="v0.0.4-soap"
+        ACTIONLINT_VERSION="v1.0.0-soap"
         ACTIONLINT_PACKAGE_VERSION="${ACTIONLINT_VERSION#v}"
 
         POUTINE_VERSION="v0.0.2-soap"
@@ -54,7 +54,7 @@ runs:
           TARGET="${TARGET%/}/*"
         fi
 
-        ./actionlint-for-SOAP $TARGET
+        ./actionlint-for-SOAP -format "$(cat $GITHUB_ACTION_PATH/actionlint_soap_template.txt)" $TARGET
       shell: bash
 
     - name: Run poutine
