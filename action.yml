@@ -82,7 +82,7 @@ runs:
           fi
         fi
 
-        ./poutine analyze_local . --disable-version-check
+        ./poutine analyze_local . --format json --disable-version-check
       shell: bash
 
     - name: Run frizbee
