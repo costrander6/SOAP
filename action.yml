@@ -24,7 +24,7 @@ runs:
         ACTIONLINT_VERSION="v1.7.12"
         ACTIONLINT_PACKAGE_VERSION="${ACTIONLINT_VERSION#v}"
 
-        POUTINE_VERSION="v0.0.2-soap"
+        POUTINE_VERSION="v1.1.6"
 
         FRIZBEE_VERSION="v0.0.3-soap"
         FRIZBEE_PACKAGE_VERSION="${FRIZBEE_VERSION#v}"
@@ -32,10 +32,8 @@ runs:
         SEMGREP_VERSION="v0.1.1-soap"
 
         echo "ACTIONLINT_PACKAGE_VERSION=${ACTIONLINT_PACKAGE_VERSION}" >> $GITHUB_ENV
-        echo "ACTIONLINT_URL=https://github.com/rhysd/actionlint/releases/download/${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
 
         echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
-        echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
 
         echo "FRIZBEE_PACKAGE_VERSION=${FRIZBEE_PACKAGE_VERSION}" >> $GITHUB_ENV
         echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
@@ -64,8 +62,10 @@ runs:
       shell: bash
 
     - name: Run poutine
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
-        wget $POUTINE_URL
+        gh release download --repo boostsecurityio/poutine --pattern 'poutine_Linux_x86_64.tar.gz' $POUTINE_VERSION
         tar -xvf poutine_Linux_x86_64.tar.gz
 
         TARGET="${{ inputs.target }}"
@@ -82,7 +82,7 @@ runs:
           fi
         fi
 
-        ./poutine analyze_local . --disable-version-check
+        ./poutine analyze_local . --format json --disable-version-check
       shell: bash
 
     - name: Run frizbee
