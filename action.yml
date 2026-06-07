@@ -34,7 +34,6 @@ runs:
         echo "ACTIONLINT_PACKAGE_VERSION=${ACTIONLINT_PACKAGE_VERSION}" >> $GITHUB_ENV
 
         echo "POUTINE_VERSION=${POUTINE_VERSION}" >> $GITHUB_ENV
-        echo "POUTINE_URL=https://github.com/costrander6/poutine-for-SOAP/releases/download/${POUTINE_VERSION}/poutine_Linux_x86_64.tar.gz" >> $GITHUB_ENV
 
         echo "FRIZBEE_PACKAGE_VERSION=${FRIZBEE_PACKAGE_VERSION}" >> $GITHUB_ENV
         echo "FRIZBEE_URL=https://github.com/costrander6/frizbee-for-SOAP/releases/download/${FRIZBEE_VERSION}/frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz" >> $GITHUB_ENV
