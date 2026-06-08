@@ -103,6 +103,6 @@ runs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libev4 libpcre3
-        pip install $SEM_URL
+        python3 -m pip install semgrep
         semgrep scan ${{ inputs.target }} --json-output=semgrep-out.json
       shell: bash
