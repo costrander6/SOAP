@@ -58,7 +58,7 @@ runs:
 
         echo "ACTIONLINT_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
 
-        ./actionlint -format "$(cat $GITHUB_ACTION_PATH/actionlint_soap_template.txt)" $TARGET
+        ./actionlint -format "$(cat $GITHUB_ACTION_PATH/actionlint_soap_template.txt)" $TARGET > actionlint-out.json
       shell: bash
 
     - name: Run poutine
@@ -82,7 +82,7 @@ runs:
           fi
         fi
 
-        ./poutine analyze_local . --format json --disable-version-check
+        ./poutine analyze_local . --format json --disable-version-check > poutine-out.json
       shell: bash
 
     - name: Run frizbee
@@ -104,5 +104,5 @@ runs:
         sudo apt-get update
         sudo apt-get install -y libev4 libpcre3
         pip install $SEM_URL
-        semgrep scan ${{ inputs.target }}
+        semgrep scan ${{ inputs.target }} --json-output=semgrep-out.json
       shell: bash
