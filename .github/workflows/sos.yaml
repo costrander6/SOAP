@@ -24,6 +24,6 @@ jobs:
 
             - name: Read scanner output
               run: |
-                cat actionlint-out.json
-                cat poutine-out.json
-                cat semgrep-out.json
+                echo actionlint; cat actionlint-out.json <(echo)
+                echo poutine; cat poutine-out.json <(echo)
+                echo semgrep; cat semgrep-out.json <(echo)
