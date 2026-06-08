@@ -18,6 +18,12 @@ jobs:
     run-soap:
         runs-on: ubuntu-latest
         steps:
-            - uses: costrander6/SOAP@4368a28c77910b01e2415ad910df846f1b0f8e89 # v2.2.0
+            - uses: costrander6/SOAP@569761bd47b4ee4179b2f43a3546128ae9bfb3b1 # v3.0.0
               with:
                 security_level: ${{ github.event_name == 'pull_request' && 'advanced' || inputs.security_level }}
+
+            - name: Read scanner output
+              run: |
+                echo actionlint; cat actionlint-out.json <(echo)
+                echo poutine; cat poutine-out.json <(echo)
+                echo semgrep; cat semgrep-out.json <(echo)
