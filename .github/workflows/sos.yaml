@@ -18,7 +18,7 @@ jobs:
     run-soap:
         runs-on: ubuntu-latest
         steps:
-            - uses: costrander6/SOAP@17022f03bc74d62d35dd9fad5068d0dbc39bd72e # v4.0.0
+            - uses: costrander6/SOAP@e5aba124b8852ea5efbd3b4ec3a49a9c5da2a323 # v4.1.0
               with:
                 security_level: ${{ github.event_name == 'pull_request' && 'advanced' || inputs.security_level }}
 
@@ -26,5 +26,5 @@ jobs:
               run: |
                 echo actionlint; cat actionlint-out.json <(echo)
                 echo poutine; cat poutine-out.json <(echo)
-                echo frizbee; cat frizbee-out.json <(echo)
+                echo frizbee; cat frizbee-out.jsonl <(echo)
                 echo semgrep; cat semgrep-out.json <(echo)
