@@ -88,9 +88,9 @@ runs:
         echo "FRIZBEE_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
 
         if [[ -f "$TARGET" ]]; then
-          ./frizbee actions -no json "$TARGET" > frizbee-out.json
+          ./frizbee actions -no json "$TARGET" > frizbee-out.jsonl
         else
-          ./frizbee actions -no json .github/workflows > frizbee-out.json
+          ./frizbee actions -no json .github/workflows > frizbee-out.jsonl
         fi
       shell: bash
 

@@ -62,23 +62,53 @@ def get_poutine_results(timestamp: datetime) -> ResultsRequest | None:
         rule = rules[rule_id]
         title = rule['title']
         description = rule['description']
-        
+
         meta = finding['meta']
         line = meta['line']
         file = meta['path']
         
-
-        results_request.findings.append(Finding(title=title, description=description, file=file, lineStart=line, lineEnd=line))
+        results_request.findings.append(
+            Finding(title=title, description=description, file=file, lineStart=line, lineEnd=line)
+        )
 
     return results_request
     
 
-def get_frizbee_results(): pass
-def get_semgrep_results(): pass
+def get_frizbee_results(timestamp: datetime) -> ResultsRequest | None: 
+    FRIZBEE_FILE = 'frizbee-out.jsonl'
+
+    results = []
+
+    try:
+        with open(FRIZBEE_FILE, 'r') as f:
+            for line in f:
+                results.append(json.loads(line))
+    except OSError:
+        return None
+    
+    results_request = ResultsRequest(scanner="frizbee", timestamp=timestamp, source=get_repo_info(), findings=[])
+    
+    for findings in results:
+        for finding in findings['findings']:
+            title = 'Pin to commit SHA instead of tag'
+            old = finding['old']
+            new = finding['new']
+            description = f'Replace "{old}" with "{new}"'
+            file = finding['file']
+            line = finding['line']
+
+            results_request.findings.append(
+                Finding(title=title, description=description, file=file, lineStart=line, lineEnd=line)
+            )
+
+    return results_request
+    
+
+def get_semgrep_results(): 
+    SEMGREP_FILE = 'semgrep-out.json'
+    
 
 def main():
-    FRIZBEE_FILE = 'frizbee-out.json'
-    SEMGREP_FILE = 'semgrep-out.json'
     RED = "\033[31m"
     RESET = "\033[0m"
 
@@ -91,7 +121,7 @@ def main():
 
     actionlint_results = get_actionlint_results(args.actionlint_timestamp)
     poutine_results = get_poutine_results(args.poutine_timestamp)
-    frizbee_results = get_frizbee_results()
+    frizbee_results = get_frizbee_results(args.frizbee_timestamp)
     semgrep_results = get_semgrep_results()
 
     if actionlint_results is None:
@@ -99,7 +129,7 @@ def main():
     if poutine_results is None:
         print(f'{RED}ERROR: Failed to read poutine results file{RESET}')
 
-    print(poutine_results)
+    print(frizbee_results)
 
 
 if __name__ == '__main__':
