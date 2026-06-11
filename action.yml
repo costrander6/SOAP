@@ -103,3 +103,9 @@ runs:
         echo "SEMGREP_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
         semgrep scan ${{ inputs.target }} --json-output=semgrep-out.json
       shell: bash
+
+    - name: Export results
+      run: |
+        pip install pydantic
+        python3 $GITHUB_ACTION_PATH/scripts/export-results.py $ACTIONLINT_SCAN_TIMESTAMP $POUTINE_SCAN_TIMESTAMP $FRIZBEE_SCAN_TIMESTAMP $SEMGREP_SCAN_TIMESTAMP
+      shell: bash
