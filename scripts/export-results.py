@@ -4,9 +4,9 @@ import json
 import os
 import subprocess
 
-from models import ResultsRequest
+from models import Finding, ResultsRequest, Source
 
-def get_repo_info() -> tuple:
+def get_repo_info() -> Source:
     repo_dir = subprocess.check_output(
         ["git", "rev-parse", "--show-toplevel"], stderr=subprocess.DEVNULL
     )
@@ -22,7 +22,7 @@ def get_repo_info() -> tuple:
     )
     commit_hash = commit.decode("utf-8").strip()
 
-    return (repo_name, branch_name, commit_hash)
+    return Source(repo=repo_name, branch=branch_name, commit=commit_hash)
 
 
 def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
@@ -34,23 +34,49 @@ def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
     except OSError:
         return None
     
-    resultsRequest = ResultsRequest.model_validate(data)
-    resultsRequest.timestamp = timestamp
+    results_request = ResultsRequest.model_validate(data)
+    results_request.timestamp = timestamp
 
-    repo, branch, commit = get_repo_info()
-    resultsRequest.source.repo = repo
-    resultsRequest.source.branch = branch
-    resultsRequest.source.commit = commit
+    source = get_repo_info()
+    results_request.source = source
 
-    return resultsRequest
+    return results_request
 
 
-def get_poutine_results(): pass
+def get_poutine_results(timestamp: datetime) -> ResultsRequest | None: 
+    POUTINE_FILE = 'poutine-out.json'
+
+    try:
+        with open(POUTINE_FILE, 'r') as f:
+            data = json.load(f)
+    except OSError:
+        return None
+    
+    results_request = ResultsRequest(scanner="poutine", timestamp=timestamp, source=get_repo_info(), findings=[])
+    
+    findings = data['findings']
+    rules = data['rules']
+
+    for finding in findings:
+        rule_id = finding['rule_id']
+        rule = rules[rule_id]
+        title = rule['title']
+        description = rule['description']
+        
+        meta = finding['meta']
+        line = meta['line']
+        file = meta['path']
+        
+
+        results_request.findings.append(Finding(title=title, description=description, file=file, lineStart=line, lineEnd=line))
+
+    return results_request
+    
+
 def get_frizbee_results(): pass
 def get_semgrep_results(): pass
 
 def main():
-    POUTINE_FILE = 'poutine-out.json'
     FRIZBEE_FILE = 'frizbee-out.json'
     SEMGREP_FILE = 'semgrep-out.json'
     RED = "\033[31m"
@@ -64,14 +90,16 @@ def main():
     args = parser.parse_args()
 
     actionlint_results = get_actionlint_results(args.actionlint_timestamp)
-    poutine_results = get_poutine_results()
+    poutine_results = get_poutine_results(args.poutine_timestamp)
     frizbee_results = get_frizbee_results()
     semgrep_results = get_semgrep_results()
 
     if actionlint_results is None:
         print(f'{RED}ERROR: Failed to read actionlint results file{RESET}')
+    if poutine_results is None:
+        print(f'{RED}ERROR: Failed to read poutine results file{RESET}')
 
-    print(actionlint_results)
+    print(poutine_results)
 
 
 if __name__ == '__main__':
