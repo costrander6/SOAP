@@ -88,9 +88,9 @@ runs:
         echo "FRIZBEE_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
 
         if [[ -f "$TARGET" ]]; then
-          ./frizbee actions -no json "$TARGET" > frizbee-out.json
+          ./frizbee actions -no json "$TARGET" > frizbee-out.jsonl
         else
-          ./frizbee actions -no json .github/workflows > frizbee-out.json
+          ./frizbee actions -no json .github/workflows > frizbee-out.jsonl
         fi
       shell: bash
 
@@ -102,4 +102,10 @@ runs:
         python3 -m pip install semgrep
         echo "SEMGREP_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
         semgrep scan ${{ inputs.target }} --json-output=semgrep-out.json
+      shell: bash
+
+    - name: Export results
+      run: |
+        pip install pydantic
+        python3 $GITHUB_ACTION_PATH/scripts/export-results.py $ACTIONLINT_SCAN_TIMESTAMP $POUTINE_SCAN_TIMESTAMP $FRIZBEE_SCAN_TIMESTAMP $SEMGREP_SCAN_TIMESTAMP
       shell: bash
