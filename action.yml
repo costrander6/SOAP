@@ -13,6 +13,7 @@ inputs:
     required: false
     type: string
     default: '.github/workflows'
+    description: target MUST be a directory and does not support globs
 
 runs:
   using: 'composite'  
@@ -21,6 +22,14 @@ runs:
 
     - name: Set Versions and URLs
       run: |
+        TARGET="${{ inputs.target }}"
+        TARGET="${TARGET%/}"
+
+        if [[ -f "$TARGET" ]]; then
+          echo "::error::Target '$TARGET' must be a directory, not a file"
+          exit 1
+        fi
+
         ACTIONLINT_VERSION="v1.7.12"
         ACTIONLINT_PACKAGE_VERSION="${ACTIONLINT_VERSION#v}"
 
@@ -47,9 +56,7 @@ runs:
         gh attestation verify -R rhysd/actionlint actionlint_${ACTIONLINT_PACKAGE_VERSION}_linux_amd64.tar.gz
         
         TARGET="${{ inputs.target }}"
-        if [[ "$TARGET" != *.yml && "$TARGET" != *.yaml ]]; then
-          TARGET="${TARGET%/}/*"
-        fi
+        TARGET="${TARGET%/}/*"
 
         echo "ACTIONLINT_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
         ./actionlint -format "$(cat $GITHUB_ACTION_PATH/actionlint_soap_template.txt)" $TARGET > actionlint-out.json
@@ -67,11 +74,7 @@ runs:
 
         if [[ "$TARGET" != ".github/workflows" ]]; then
           mkdir -p .github/workflows
-          if [[ -f "$TARGET" ]]; then
-            cp "$TARGET" .github/workflows/
-          elif [[ -d "$TARGET" ]]; then
-            cp "$TARGET"/* .github/workflows/
-          fi
+          cp "$TARGET"/* .github/workflows/
         fi
 
         echo "POUTINE_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
@@ -85,11 +88,7 @@ runs:
         tar -xvf frizbee_${FRIZBEE_PACKAGE_VERSION}_linux_amd64.tar.gz
         echo "FRIZBEE_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
 
-        if [[ -f "$TARGET" ]]; then
-          ./frizbee actions -no json "$TARGET" > frizbee-out.jsonl
-        else
-          ./frizbee actions -no json .github/workflows > frizbee-out.jsonl
-        fi
+        ./frizbee actions -no json .github/workflows > frizbee-out.jsonl
       shell: bash
 
     - name: Run semgrep

@@ -27,11 +27,11 @@ def get_repo_info() -> Source:
 def get_path(target: str, scanner_path: str) -> str:
     if target == '.github/workflows':
         return scanner_path
-    if os.path.isfile(target):
-        return target
     if os.path.isdir(target):
         filename = os.path.basename(scanner_path)
-        return str(os.path.join(target, filename))
+        onlyfiles = [f for f in os.listdir(target) if os.path.isfile(os.path.join(target, f))]
+        if filename in onlyfiles:
+            return str(os.path.join(target, filename))
     return scanner_path
 
 def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
