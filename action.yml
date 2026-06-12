@@ -71,6 +71,7 @@ runs:
             cp "$TARGET" .github/workflows/
           elif [[ -d "$TARGET" ]]; then
             cp "$TARGET"/* .github/workflows/
+          fi
         fi
 
         echo "POUTINE_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
