@@ -138,14 +138,14 @@ def main():
     parser = ArgumentParser(description='A tool that sends the output from SOAP compatible scanners to the SOAP service')
     parser.add_argument('actionlint_timestamp', type=lambda s: datetime.fromisoformat(s))
     parser.add_argument('poutine_timestamp', type=lambda s: datetime.fromisoformat(s))
-    parser.add_argument('frizbee_timestamp', type=lambda s: datetime.fromisoformat(s))
-    parser.add_argument('semgrep_timestamp', type=lambda s: datetime.fromisoformat(s))
+    parser.add_argument('-f', '--frizbee-timestamp', type=lambda s: datetime.fromisoformat(s))
+    parser.add_argument('-s', '--semgrep-timestamp', type=lambda s: datetime.fromisoformat(s))
     args = parser.parse_args()
 
     actionlint_results = get_actionlint_results(args.actionlint_timestamp)
     poutine_results = get_poutine_results(args.poutine_timestamp)
-    frizbee_results = get_frizbee_results(args.frizbee_timestamp)
-    semgrep_results = get_semgrep_results(args.semgrep_timestamp)
+    frizbee_results = None if args.frizbee_timestamp is None else get_frizbee_results(args.frizbee_timestamp)
+    semgrep_results = None if args.semgrep_timestamp is None else get_semgrep_results(args.semgrep_timestamp)
 
     if actionlint_results is None:
         print(f'{RED}ERROR: Failed to read actionlint results file{RESET}')
