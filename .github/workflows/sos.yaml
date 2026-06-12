@@ -26,5 +26,5 @@ jobs:
               run: |
                 echo actionlint; cat actionlint-out.json <(echo)
                 echo poutine; cat poutine-out.json <(echo)
-                echo frizbee; cat frizbee-out.jsonl <(echo)
-                echo semgrep; cat semgrep-out.json <(echo)
+                echo frizbee; cat frizbee-out.jsonl <(echo) || true
+                echo semgrep; cat semgrep-out.json <(echo) || true
