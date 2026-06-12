@@ -24,6 +24,15 @@ def get_repo_info() -> Source:
 
     return Source(repo=repo_name, branch=branch_name, commit=commit_hash)
 
+def get_path(target: str, scanner_path: str) -> str:
+    if target == '.github/workflows':
+        return scanner_path
+    if os.path.isfile(target):
+        return target
+    if os.path.isdir(target):
+        filename = os.path.basename(scanner_path)
+        return str(os.path.join(target, filename))
+    return scanner_path
 
 def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
     ACTIONLINT_FILE = 'actionlint-out.json'
@@ -41,7 +50,7 @@ def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
     return results_request
 
 
-def get_poutine_results(timestamp: datetime) -> ResultsRequest | None: 
+def get_poutine_results(timestamp: datetime, target: str) -> ResultsRequest | None: 
     POUTINE_FILE = 'poutine-out.json'
 
     try:
@@ -65,13 +74,13 @@ def get_poutine_results(timestamp: datetime) -> ResultsRequest | None:
         file = meta['path']
         
         results_request.findings.append(
-            Finding(title=title, description=description, file=file, lineStart=line, lineEnd=line)
+            Finding(title=title, description=description, file=get_path(target, file), lineStart=line, lineEnd=line)
         )
 
     return results_request
     
 
-def get_frizbee_results(timestamp: datetime) -> ResultsRequest | None: 
+def get_frizbee_results(timestamp: datetime, target: str) -> ResultsRequest | None: 
     FRIZBEE_FILE = 'frizbee-out.jsonl'
 
     json_lines = []
@@ -94,7 +103,7 @@ def get_frizbee_results(timestamp: datetime) -> ResultsRequest | None:
             line = finding['line']
 
             results_request.findings.append(
-                Finding(title=title, description=description, file=file, lineStart=line, lineEnd=line)
+                Finding(title=title, description=description, file=get_path(target, file), lineStart=line, lineEnd=line)
             )
 
     return results_request
@@ -138,13 +147,14 @@ def main():
     parser = ArgumentParser(description='A tool that sends the output from SOAP compatible scanners to the SOAP service')
     parser.add_argument('actionlint_timestamp', type=lambda s: datetime.fromisoformat(s))
     parser.add_argument('poutine_timestamp', type=lambda s: datetime.fromisoformat(s))
+    parser.add_argument('target', type=str)
     parser.add_argument('-f', '--frizbee-timestamp', type=lambda s: datetime.fromisoformat(s))
     parser.add_argument('-s', '--semgrep-timestamp', type=lambda s: datetime.fromisoformat(s))
     args = parser.parse_args()
 
     actionlint_results = get_actionlint_results(args.actionlint_timestamp)
-    poutine_results = get_poutine_results(args.poutine_timestamp)
-    frizbee_results = None if args.frizbee_timestamp is None else get_frizbee_results(args.frizbee_timestamp)
+    poutine_results = get_poutine_results(args.poutine_timestamp, args.target)
+    frizbee_results = None if args.frizbee_timestamp is None else get_frizbee_results(args.frizbee_timestamp, args.target)
     semgrep_results = None if args.semgrep_timestamp is None else get_semgrep_results(args.semgrep_timestamp)
 
     if actionlint_results is None:

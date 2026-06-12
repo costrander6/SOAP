@@ -26,7 +26,7 @@ runs:
 
         POUTINE_VERSION="v1.1.6"
 
-        FRIZBEE_VERSION="v0.1.1-soap"
+        FRIZBEE_VERSION="v0.1.2-soap"
         FRIZBEE_PACKAGE_VERSION="${FRIZBEE_VERSION#v}"
 
         echo "ACTIONLINT_PACKAGE_VERSION=${ACTIONLINT_PACKAGE_VERSION}" >> $GITHUB_ENV
@@ -71,9 +71,6 @@ runs:
             cp "$TARGET" .github/workflows/
           elif [[ -d "$TARGET" ]]; then
             cp "$TARGET"/* .github/workflows/
-          else
-            cp $TARGET .github/workflows/
-          fi
         fi
 
         echo "POUTINE_SCAN_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")" >> $GITHUB_ENV
@@ -107,5 +104,5 @@ runs:
     - name: Export results
       run: |
         pip install pydantic
-        python3 $GITHUB_ACTION_PATH/scripts/export-results.py $ACTIONLINT_SCAN_TIMESTAMP $POUTINE_SCAN_TIMESTAMP -f $FRIZBEE_SCAN_TIMESTAMP -s $SEMGREP_SCAN_TIMESTAMP
+        python3 $GITHUB_ACTION_PATH/scripts/export-results.py $ACTIONLINT_SCAN_TIMESTAMP $POUTINE_SCAN_TIMESTAMP "${{inputs.target}}" -f $FRIZBEE_SCAN_TIMESTAMP -s $SEMGREP_SCAN_TIMESTAMP
       shell: bash
