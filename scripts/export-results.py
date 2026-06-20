@@ -2,9 +2,13 @@ from argparse import ArgumentParser
 from datetime import datetime
 import json
 import os
+import requests
 import subprocess
 
-from models import Finding, ResultsRequest, Source
+from models import *
+
+extra_values_to_severities = {"note": SeverityLevel.LOW, "info": SeverityLevel.LOW, "warning": SeverityLevel.MEDIUM,
+                              "error": SeverityLevel.HIGH}
 
 def get_repo_info() -> Source:
     repo_dir = subprocess.check_output(
@@ -34,7 +38,17 @@ def get_path(target: str, scanner_path: str) -> str:
             return str(os.path.join(target, filename))
     return scanner_path
 
-def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
+def map_string_to_severity_level(value: str) -> SeverityLevel:
+    try:
+        severity = SeverityLevel[value.upper()]
+    except KeyError:
+        if value.lower() in extra_values_to_severities:
+            return extra_values_to_severities[value.lower()]
+        else :
+            return SeverityLevel.UNCATEGORIZED
+    return severity
+
+def get_actionlint_results() -> ScanResult | None:
     ACTIONLINT_FILE = 'actionlint-out.json'
 
     try:
@@ -43,14 +57,15 @@ def get_actionlint_results(timestamp: datetime) -> ResultsRequest | None:
     except OSError:
         return None
     
-    results_request = ResultsRequest.model_validate(data)
-    results_request.timestamp = timestamp
-    results_request.source = get_repo_info()
+    results_request = ScanResult.model_validate(data)
+
+    for finding in results_request.findings:
+        finding.severity = SeverityLevel.UNCATEGORIZED
 
     return results_request
 
 
-def get_poutine_results(timestamp: datetime, target: str) -> ResultsRequest | None: 
+def get_poutine_results(target: str) -> ScanResult | None: 
     POUTINE_FILE = 'poutine-out.json'
 
     try:
@@ -59,7 +74,7 @@ def get_poutine_results(timestamp: datetime, target: str) -> ResultsRequest | No
     except OSError:
         return None
     
-    results_request = ResultsRequest(scanner="poutine", timestamp=timestamp, source=get_repo_info(), findings=[])
+    results_request = ScanResult(scanner="poutine", findings=[])
     
     rules = data['rules']
     findings = data['findings']
@@ -68,19 +83,21 @@ def get_poutine_results(timestamp: datetime, target: str) -> ResultsRequest | No
         rule = rules[rule_id]
         title = rule['title']
         description = rule['description']
+        severity = rule['level']
 
         meta = finding['meta']
         line = meta['line']
         file = meta['path']
         
         results_request.findings.append(
-            Finding(title=title, description=description, file=get_path(target, file), lineStart=line, lineEnd=line)
+            Finding(title=title, description=description, file=get_path(target, file), 
+                    lineStart=line, lineEnd=line, severity=map_string_to_severity_level(severity))
         )
 
     return results_request
     
 
-def get_frizbee_results(timestamp: datetime, target: str) -> ResultsRequest | None: 
+def get_frizbee_results(target: str) -> ScanResult | None: 
     FRIZBEE_FILE = 'frizbee-out.jsonl'
 
     json_lines = []
@@ -91,7 +108,7 @@ def get_frizbee_results(timestamp: datetime, target: str) -> ResultsRequest | No
     except OSError:
         return None
     
-    results_request = ResultsRequest(scanner="frizbee", timestamp=timestamp, source=get_repo_info(), findings=[])
+    results_request = ScanResult(scanner="frizbee", findings=[])
     
     for json_line in json_lines:
         for finding in json_line['findings']:
@@ -103,13 +120,14 @@ def get_frizbee_results(timestamp: datetime, target: str) -> ResultsRequest | No
             line = finding['line']
 
             results_request.findings.append(
-                Finding(title=title, description=description, file=get_path(target, file), lineStart=line, lineEnd=line)
+                Finding(title=title, description=description, file=get_path(target, file), 
+                        lineStart=line, lineEnd=line, severity=SeverityLevel.UNCATEGORIZED)
             )
 
     return results_request
     
 
-def get_semgrep_results(timestamp: datetime) -> ResultsRequest | None: 
+def get_semgrep_results() -> ScanResult | None: 
     SEMGREP_FILE = 'semgrep-out.json'
 
     try:
@@ -118,7 +136,7 @@ def get_semgrep_results(timestamp: datetime) -> ResultsRequest | None:
     except OSError:
         return None
     
-    results_request = ResultsRequest(scanner="semgrep", timestamp=timestamp, source=get_repo_info(), findings=[])
+    results_request = ScanResult(scanner='semgrep', findings=[])
 
     results = data['results']
     for result in results:
@@ -128,49 +146,76 @@ def get_semgrep_results(timestamp: datetime) -> ResultsRequest | None:
 
         extra = result['extra']
         description = extra['message']
+        severity = extra['severity']
         title = str(extra['metadata']['cwe'][0])
 
         title = title.split(': ', 1)[-1]
 
 
         results_request.findings.append(
-            Finding(title=title, description=description, file=file, lineStart=lineStart, lineEnd=lineEnd)
+            Finding(title=title, description=description, file=file, 
+                    lineStart=lineStart, lineEnd=lineEnd, severity=map_string_to_severity_level(severity))
         )
     
     return results_request
-    
 
 def main():
     RED = "\033[31m"
     RESET = "\033[0m"
 
     parser = ArgumentParser(description='A tool that sends the output from SOAP compatible scanners to the SOAP service')
-    parser.add_argument('actionlint_timestamp', type=lambda s: datetime.fromisoformat(s))
-    parser.add_argument('poutine_timestamp', type=lambda s: datetime.fromisoformat(s))
+    parser.add_argument('api_key', type=str)
+    parser.add_argument('base_url', type=str)
+    parser.add_argument('timestamp', type=lambda s: datetime.fromisoformat(s))
     parser.add_argument('target', type=str)
-    parser.add_argument('-f', '--frizbee-timestamp', type=lambda s: datetime.fromisoformat(s))
-    parser.add_argument('-s', '--semgrep-timestamp', type=lambda s: datetime.fromisoformat(s))
     args = parser.parse_args()
 
-    actionlint_results = get_actionlint_results(args.actionlint_timestamp)
-    poutine_results = get_poutine_results(args.poutine_timestamp, args.target)
-    frizbee_results = None if args.frizbee_timestamp is None else get_frizbee_results(args.frizbee_timestamp, args.target)
-    semgrep_results = None if args.semgrep_timestamp is None else get_semgrep_results(args.semgrep_timestamp)
+    actionlint_results = get_actionlint_results()
+    poutine_results = get_poutine_results(args.target)
+    frizbee_results = get_frizbee_results(args.target)
+    semgrep_results = get_semgrep_results()
 
     if actionlint_results is None:
         print(f'{RED}ERROR: Failed to read actionlint results file{RESET}')
     if poutine_results is None:
         print(f'{RED}ERROR: Failed to read poutine results file{RESET}')
 
-    #TODO: remove print statements when the script sends the results to the SOAP service
-    print('------------------actionlint------------------')
-    print(actionlint_results)
-    print('-------------------poutine-------------------')
-    print(poutine_results)
-    print('-------------------frizbee-------------------')
-    print(frizbee_results)
-    print('-------------------semgrep-------------------')
-    print(semgrep_results)
+    headers = {
+        'Content-Type': 'application/json',
+        'X-Api-Key': args.api_key
+    }
+
+    source = get_repo_info()
+
+    create_workflow_run_request = CreateWorkflowRunRequest(repo=source.repo, branch=source.branch, commit=source.commit, 
+                                                           timestamp=args.timestamp)
+    
+    response = requests.post(url=args.base_url + '/workflow-run', 
+                             json=create_workflow_run_request.model_dump(mode='json'), headers=headers)
+    response_data = response.json()
+    workflow_run_id = response_data['id']
+    scanner_result_url = args.base_url + '/scan-result'
+
+    if actionlint_results is not None:
+        actionlint_results.workflow_run_id = workflow_run_id
+        requests.post(url=scanner_result_url, 
+                      json=actionlint_results.model_dump(mode='json', by_alias=True), headers=headers)
+
+    if poutine_results is not None:
+        poutine_results.workflow_run_id = workflow_run_id
+        requests.post(url=scanner_result_url, 
+                      json=poutine_results.model_dump(mode='json', by_alias=True), headers=headers)
+
+    if frizbee_results is not None:
+        frizbee_results.workflow_run_id = workflow_run_id
+        requests.post(url=scanner_result_url, 
+                      json=frizbee_results.model_dump(mode='json', by_alias=True), headers=headers)
+
+    if semgrep_results is not None:
+        semgrep_results.workflow_run_id = workflow_run_id
+        requests.post(url=scanner_result_url, 
+                      json=semgrep_results.model_dump(mode='json', by_alias=True), headers=headers)
+
 
 
 if __name__ == '__main__':
