@@ -103,7 +103,9 @@ runs:
       shell: bash
 
     - name: Export results
+      env:
+        SOAP_URL: https://soapwebservice-34.229.9.110.nip.io
       run: |
         pip install pydantic
-        python3 $GITHUB_ACTION_PATH/scripts/export-results.py ${{ inputs.api_key }} $WORKFLOW_TIMESTAMP "${{inputs.target}}"
+        python3 $GITHUB_ACTION_PATH/scripts/export-results.py "${{inputs.api_key}}" "${{env.SOAP_URL}}" $WORKFLOW_TIMESTAMP "${{inputs.target}}"
       shell: bash
