@@ -16,10 +16,12 @@ def get_repo_info() -> Source:
     )
     repo_name = os.path.basename(repo_dir.decode("utf-8").strip())
 
-    branch = subprocess.check_output(
-        ["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL
-    )
-    branch_name = branch.decode("utf-8").strip()
+    branch_name = os.environ.get("GITHUB_REF_NAME")
+    if branch_name is None:
+        branch = subprocess.check_output(
+            ["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL
+        )
+        branch_name = branch.decode("utf-8").strip()
 
     commit = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], stderr=subprocess.DEVNULL
