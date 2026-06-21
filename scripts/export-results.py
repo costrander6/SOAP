@@ -16,7 +16,7 @@ def get_repo_info() -> Source:
     )
     repo_name = os.path.basename(repo_dir.decode("utf-8").strip())
 
-    branch_name = os.environ.get("GITHUB_REF_NAME")
+    branch_name = os.environ.get("GITHUB_HEAD_REF") or os.environ.get("GITHUB_REF_NAME")
     if branch_name is None:
         branch = subprocess.check_output(
             ["git", "rev-parse", "--abbrev-ref", "HEAD"], stderr=subprocess.DEVNULL
