@@ -21,14 +21,17 @@ jobs:
     run-soap:
         runs-on: ubuntu-latest
         steps:
+            - name: Determine scan level
+              id: scan-level
+              run: |
+                if [ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]; then
+                    echo "level=advanced" >> $GITHUB_OUTPUT
+                else
+                    echo "level=${{ inputs.security_level }}" >> $GITHUB_OUTPUT
+                fi
+              shell: bash
+
             - uses: costrander6/SOAP@7129f0f4a918a7c0e1c3964d0fd84161a0466954 # v6.0.3
               with:
-                security_level: ${{ github.event_name == 'pull_request' && 'advanced' || inputs.security_level }}
+                security_level: ${{ steps.scan-level.outputs.level }}
                 api_key: ${{ secrets.SOAP_API_KEY }}
-
-            - name: Read scanner output
-              run: |
-                echo actionlint; cat actionlint-out.json <(echo)
-                echo poutine; cat poutine-out.json <(echo)
-                echo frizbee; cat frizbee-out.jsonl <(echo) || true
-                echo semgrep; cat semgrep-out.json <(echo) || true
