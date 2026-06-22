@@ -35,4 +35,4 @@ jobs:
               with:
                 security_level: ${{ steps.scan-level.outputs.level }}
                 api_key: ${{ secrets.SOAP_API_KEY }}
-                target: ./action.yml
+                target: .
