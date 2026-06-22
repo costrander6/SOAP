@@ -24,7 +24,7 @@ jobs:
             - name: Determine scan level
               id: scan-level
               run: |
-                if [ "${{ github.event_name }}" == "push" || "${{ github.event_name }}" == "pull_request" ]; then
+                if [ "${{ github.event_name }}" == "push"] || ["${{ github.event_name }}" == "pull_request" ]; then
                     echo "level=advanced" >> $GITHUB_OUTPUT
                 else
                     echo "level=${{ inputs.security_level }}" >> $GITHUB_OUTPUT
