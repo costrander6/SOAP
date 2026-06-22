@@ -23,11 +23,13 @@ jobs:
         steps:
             - name: Determine scan level
               id: scan-level
+              env:
+                INPUT_LEVEL: ${{ inputs.security_level }}
               run: |
                 if [ "${{ github.event_name }}" == "push" ] || [ "${{ github.event_name }}" == "pull_request" ]; then
                     echo "level=advanced" >> $GITHUB_OUTPUT
                 else
-                    echo "level=${{ inputs.security_level }}" >> $GITHUB_OUTPUT
+                    echo "level=$INPUT_LEVEL" >> $GITHUB_OUTPUT
                 fi
               shell: bash
 
